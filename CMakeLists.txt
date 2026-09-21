@@ -64,7 +64,8 @@ target_sources(
           lib/switcher-data.cpp
           lib/switcher-data.hpp
           lib/version.cpp
-          lib/version.h)
+          lib/version.h
+          forms/advanced-scene-switcher.ui)
 
 # Legacy function sources
 target_sources(
