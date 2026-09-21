@@ -63,6 +63,7 @@ package() {
   local -r -a _valid_targets=(
     macos-universal
     linux-x86_64
+    linux-aarch64
   )
   local target
   local config='RelWithDebInfo'

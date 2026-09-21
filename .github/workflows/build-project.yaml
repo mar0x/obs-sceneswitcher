@@ -273,7 +273,17 @@ jobs:
 
   ubuntu-26-build:
     name: Build for Ubuntu 26 🐧
-    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-26.04]
+        target: [x86_64, aarch64]
+        include:
+          - target: x86_64
+            runs_on: ubuntu-26.04
+          - target: aarch64
+            runs_on: ubuntu-26.04-arm
+    runs-on: ${{ matrix.runs_on }}
     needs: check-event
     defaults:
       run:
@@ -302,9 +312,9 @@ jobs:
         id: ccache-cache
         with:
           path: ${{ github.workspace }}/.ccache
-          key: ${{ runner.os }}-ccache-x86_64-${{ needs.check-event.outputs.config }}
+          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ needs.check-event.outputs.config }}
           restore-keys: |
-            ${{ runner.os }}-ccache-x86_64-
+            ${{ runner.os }}-ccache-${{ matrix.target }}-
 
       - name: Set up Homebrew 🍺
         uses: Homebrew/actions/setup-homebrew@main
@@ -312,35 +322,35 @@ jobs:
       - name: Build Plugin 🧱
         uses: ./.github/actions/build-plugin
         with:
-          target: x86_64
+          target: ${{ matrix.target }}
           config: ${{ needs.check-event.outputs.config }}
 
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
-          target: x86_64
+          target: ${{ matrix.target }}
           config: ${{ needs.check-event.outputs.config }}
 
       - name: Package Plugin 📀
         uses: ./.github/actions/package-plugin
         with:
           package: ${{ fromJSON(needs.check-event.outputs.package) }}
-          target: x86_64
+          target: ${{ matrix.target }}
           config: ${{ needs.check-event.outputs.config }}
 
       - name: Rename artifacts for Ubuntu 26 🏷️
         run: |
           : Rename artifacts for Ubuntu 26 🏷️
-          for f in ${{ github.workspace }}/release/*-x86_64-linux-gnu.*; do
+          for f in ${{ github.workspace }}/release/*-${{ matrix.target }}-linux-gnu.*; do
             [ -e "${f}" ] || continue
-            mv "${f}" "${f/x86_64-linux-gnu/x86_64-ubuntu26.04-linux-gnu}"
+            mv "${f}" "${f/-linux-gnu/-ubuntu26.04-linux-gnu}"
           done
 
       - name: Upload Artifacts 📡
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.setup.outputs.pluginName }}-${{ steps.setup.outputs.pluginVersion }}-ubuntu-26.04-x86_64-${{ needs.check-event.outputs.commitHash }}
-          path: ${{ github.workspace }}/release/${{ steps.setup.outputs.pluginName }}-*-x86_64*.*
+          name: ${{ steps.setup.outputs.pluginName }}-${{ steps.setup.outputs.pluginVersion }}-ubuntu-26.04-${{ matrix.target }}-${{ needs.check-event.outputs.commitHash }}
+          path: ${{ github.workspace }}/release/${{ steps.setup.outputs.pluginName }}-*-${{ matrix.target }}*.*
 
       - name: Upload debug symbol artifacts 🪲
         uses: actions/upload-artifact@v7
