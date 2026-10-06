@@ -32,7 +32,7 @@ void NumberVariable<T>::Load(obs_data_t *obj, const char *name)
 {
 	auto data = obs_data_get_obj(obj, name);
 	if constexpr (std::is_same<T, int>::value) {
-		_value = obs_data_get_int(data, "value");
+		_value = static_cast<T>(obs_data_get_int(data, "value"));
 	} else if constexpr (std::is_same<T, double>::value) {
 		_value = obs_data_get_double(data, "value");
 	} else {
