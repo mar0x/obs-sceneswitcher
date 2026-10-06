@@ -220,10 +220,20 @@ bool MacroConditionAudio::CheckMonitor()
 	bool ret = false;
 	OBSSourceAutoRelease source =
 		obs_weak_source_get_source(_audioSource.GetSource());
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 2)
+	ret = obs_source_get_monitoring_enabled(source) == (_monitorType != OBS_MONITORING_TYPE_NONE);
+#else
 	ret = obs_source_get_monitoring_type(source) == _monitorType;
+#endif
 	SetVariableValue("");
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 2)
+	SetTempVarValue("monitor",
+			std::to_string(obs_source_get_monitoring_enabled(source) ?
+					OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT : OBS_MONITORING_TYPE_NONE));
+#else
 	SetTempVarValue("monitor",
 			std::to_string(obs_source_get_monitoring_type(source)));
+#endif
 	return ret && source;
 }
 

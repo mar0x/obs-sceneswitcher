@@ -156,7 +156,11 @@ bool MacroActionPlayAudio::PerformAction()
 	const float vol =
 		DecibelToPercent(static_cast<float>(_volumeDB.GetValue()));
 	obs_source_set_volume(source, vol);
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 2)
+	obs_source_set_monitoring_enabled(source, _monitorType != OBS_MONITORING_TYPE_NONE);
+#else
 	obs_source_set_monitoring_type(source, _monitorType);
+#endif
 	if (_mono) {
 		obs_source_set_flags(source, OBS_SOURCE_FLAG_FORCE_MONO);
 	}
@@ -165,11 +169,13 @@ bool MacroActionPlayAudio::PerformAction()
 	const bool wantsOutput =
 		(_monitorType != OBS_MONITORING_TYPE_MONITOR_ONLY) &&
 		(_audioMixers != 0);
+#if LIBOBS_API_VER < MAKE_SEMANTIC_VERSION(32, 2, 2)
 	if (!wantsOutput &&
 	    _monitorType == OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT) {
 		obs_source_set_monitoring_type(
 			source, OBS_MONITORING_TYPE_MONITOR_ONLY);
 	}
+#endif
 
 	if (wantsOutput) {
 		obs_source_set_audio_mixers(source, _audioMixers);

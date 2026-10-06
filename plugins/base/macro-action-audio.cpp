@@ -273,7 +273,11 @@ bool MacroActionAudio::PerformAction()
 		setSyncOffsetHelper(s, _syncOffset * nsPerMs);
 		break;
 	case Action::MONITOR:
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 2)
+		obs_source_set_monitoring_enabled(s, _monitorType != OBS_MONITORING_TYPE_NONE);
+#else
 		obs_source_set_monitoring_type(s, _monitorType);
+#endif
 		break;
 	case Action::BALANCE:
 		obs_source_set_balance_value(s, _balance);
