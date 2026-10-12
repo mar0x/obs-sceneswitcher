@@ -33,6 +33,8 @@ Vcs-Git: https://github.com/mar0x/obs-sceneswitcher.git
 
 Package: obs-sceneswitcher
 Architecture: any
-Depends: ${misc:Depends},
+Depends:
+  ${misc:Depends},
+  ${shlibs:Depends},
 Description: An automation plugin for OBS Studio
  More information can be found in the OBS forums or the plugin's wiki.
